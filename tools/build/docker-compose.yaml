@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7.0.2
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_PORT: 27017
+    volumes:
+      - mongodb-data:/data/db
+    restart: always
+  rabbitmq:
+    image: 'rabbitmq:management'
+    ports:
+      - '15672:15672' # Management UI
+      - '5672:5672' # RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+  loyalty:
+    build:
+      context: ${WORKSPACE_ROOT}
+      dockerfile: ./apps/loyalty/Dockerfile
+    ports:
+      - '3001:3000'
+    environment:
+      MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+    volumes:
+      - ${WORKSPACE_ROOT}/apps/loyalty:/app/apps/loyalty
+    depends_on:
+      - mongo
+      - rabbitmq
+  order:
+    build:
+      context: ${WORKSPACE_ROOT}
+      dockerfile: ./apps/order/Dockerfile
+    ports:
+      - '3002:3000'
+    environment:
+      MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+    volumes:
+      - ${WORKSPACE_ROOT}/apps/order:/app/apps/order
+    depends_on:
+      - mongo
+      - rabbitmq
+  warehouse:
+    build:
+      context: ${WORKSPACE_ROOT}
+      dockerfile: ./apps/warehouse/Dockerfile
+    ports:
+      - '3003:3000'
+    environment:
+      MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+    volumes:
+      - ${WORKSPACE_ROOT}/apps/warehouse:/app/apps/warehouse
+    depends_on:
+      - mongo
+      - rabbitmq
+  payment:
+    build:
+      context: ${WORKSPACE_ROOT}
+      dockerfile: ./apps/payment/Dockerfile
+    ports:
+      - '3004:3000'
+    environment:
+      MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+    volumes:
+      - ${WORKSPACE_ROOT}/apps/payment:/app/apps/payment
+    depends_on:
+      - mongo
+      - rabbitmq
+volumes:
+  mongodb-data:
