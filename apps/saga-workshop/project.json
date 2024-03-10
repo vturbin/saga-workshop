@@ -1,0 +1,24 @@
+{
+  "name": "saga-workshop",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/saga-workshop/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "saga-workshop:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "saga-workshop:build:development"
+        },
+        "production": {
+          "buildTarget": "saga-workshop:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
