@@ -1,0 +1,20 @@
+{
+  "name": "nest-shared",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/nest-shared/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/nest-shared",
+        "tsConfig": "libs/nest-shared/tsconfig.lib.json",
+        "packageJson": "libs/nest-shared/package.json",
+        "main": "libs/nest-shared/src/index.ts",
+        "assets": ["libs/nest-shared/*.md"]
+      }
+    }
+  },
+  "tags": []
+}
