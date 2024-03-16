@@ -4,11 +4,52 @@
   "sourceRoot": "apps/loyalty/src",
   "projectType": "application",
   "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/loyalty",
+        "main": "apps/loyalty/src/main.ts",
+        "tsConfig": "apps/loyalty/tsconfig.app.json",
+        "assets": ["apps/loyalty/src/assets"],
+        "webpackConfig": "apps/loyalty/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/loyalty/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/loyalty/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "loyalty:build"
+        "buildTarget": "loyalty:build",
+        "inspect": true,
+        "port": 9229
       },
       "configurations": {
         "development": {

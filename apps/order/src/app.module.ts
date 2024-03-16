@@ -1,15 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { PointsController } from './controllers/points.controller';
-import { PointsService } from './services/points.service';
+import { OrderController } from './controllers/order.controller';
+import { OrderService } from './services/order.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { CustomerLoyaltyRepository } from './repositories/customer-loyalty.repository';
-import { MongooseModule } from '@nestjs/mongoose';
-import {
-  CustomerLoyalty,
-  customerLoyaltySchema,
-} from './models/customer-loyalty.schema';
+import { LoyaltyClient } from '@nest-shared';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/';
@@ -21,12 +16,6 @@ export const DATABASE_CONFIGURATION = {
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      DATABASE_CONFIGURATION.mongoConnectionString as string
-    ),
-    MongooseModule.forFeature([
-      { name: CustomerLoyalty.name, schema: customerLoyaltySchema },
-    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
@@ -39,7 +28,7 @@ export const DATABASE_CONFIGURATION = {
       }),
     }),
   ],
-  controllers: [PointsController],
-  providers: [PointsService, CustomerLoyaltyRepository],
+  controllers: [OrderController],
+  providers: [OrderService, LoyaltyClient],
 })
 export class AppModule {}

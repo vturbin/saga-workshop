@@ -5,14 +5,30 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/libs/nest-shared",
-        "tsConfig": "libs/nest-shared/tsconfig.lib.json",
-        "packageJson": "libs/nest-shared/package.json",
         "main": "libs/nest-shared/src/index.ts",
-        "assets": ["libs/nest-shared/*.md"]
+        "outputPath": "dist/libs/nest-shared",
+        "outputFileName": "main.js",
+        "tsConfig": "libs/nest-shared/tsconfig.lib.json",
+        "assets": [
+          {
+            "glob": "libs/nest-shared/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "platform": "node"
+      },
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
       }
     }
   },

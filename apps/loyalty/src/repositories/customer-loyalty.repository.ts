@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { MongoGenericRepository } from '@shared';
+import { MongoGenericRepository } from '@nest-shared';
 import { CustomerLoyalty } from '../models/customer-loyalty.schema';
 import { Model } from 'mongoose';
 

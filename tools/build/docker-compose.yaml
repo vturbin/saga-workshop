@@ -26,13 +26,16 @@ services:
       dockerfile: ./apps/loyalty/Dockerfile
     ports:
       - '3001:3000'
+      - '9221:9229'
     environment:
       MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
+    # restart: always
     volumes:
       - ${WORKSPACE_ROOT}/apps/loyalty:/app/apps/loyalty
+      - ${WORKSPACE_ROOT}/libs:/app/libs
     depends_on:
       - mongo
       - rabbitmq
@@ -42,13 +45,16 @@ services:
       dockerfile: ./apps/order/Dockerfile
     ports:
       - '3002:3000'
+      - '9222:9229'
     environment:
       MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
+    # restart: always
     volumes:
       - ${WORKSPACE_ROOT}/apps/order:/app/apps/order
+      - ${WORKSPACE_ROOT}/libs:/app/libs
     depends_on:
       - mongo
       - rabbitmq
@@ -58,13 +64,16 @@ services:
       dockerfile: ./apps/warehouse/Dockerfile
     ports:
       - '3003:3000'
+      - '9223:9229'
     environment:
       MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
+    # restart: always
     volumes:
       - ${WORKSPACE_ROOT}/apps/warehouse:/app/apps/warehouse
+      - ${WORKSPACE_ROOT}/libs:/app/libs
     depends_on:
       - mongo
       - rabbitmq
@@ -74,13 +83,16 @@ services:
       dockerfile: ./apps/payment/Dockerfile
     ports:
       - '3004:3000'
+      - '9224:9229'
     environment:
       MONGO_CONNECTION_STRING_DOCKER: ${MONGO_CONNECTION_STRING_DOCKER}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
+    # restart: always
     volumes:
       - ${WORKSPACE_ROOT}/apps/payment:/app/apps/payment
+      - ${WORKSPACE_ROOT}/libs:/app/libs
     depends_on:
       - mongo
       - rabbitmq

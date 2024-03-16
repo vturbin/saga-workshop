@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CustomerLoyaltyRepository } from '../repositories/customer-loyalty.repository';
-import { AssignLoyaltyPointsResponseDto } from '@shared';
+import { AssignLoyaltyPointsResponseDto } from '@nest-shared';
 @Injectable()
 export class PointsService {
   constructor(private customerLoyaltyRepository: CustomerLoyaltyRepository) {}

@@ -4,7 +4,7 @@ import { PointsService } from '../services/points.service';
 import {
   AssignLoyaltyPointsRequestDto,
   AssignLoyaltyPointsResponseDto,
-} from '@shared';
+} from '@nest-shared';
 
 @Controller('points')
 export class PointsController {

@@ -4,7 +4,11 @@
   "license": "MIT",
   "scripts": {
     "docker:build:dev": "cd tools/build && docker-compose build",
-    "docker:run:dev": "cd tools/build && docker-compose up -d"
+    "docker:run:dev": "cd tools/build && docker-compose up -d",
+    "loyalty:dev:docker": "nx reset && nx serve loyalty",
+    "order:dev:docker": "nx reset && nx serve order",
+    "payment:dev:docker": "nx reset && nx serve payment",
+    "warehouse:dev:docker": "nx reset && nx serve warehouse"
   },
   "private": true,
   "dependencies": {
