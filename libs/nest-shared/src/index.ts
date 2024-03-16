@@ -1,5 +1,6 @@
 export * from './lib/nest-shared.module';
 export * from './lib/clients/loyalty.client';
+export * from './lib/clients/warehouse.client';
 export * from './lib/loyalty/assign-loyalty-points.dto';
 export * from './lib/db/interfaces/generic-repository.abstract';
 export * from './lib/db/repositories/mongo-generic.repository';
@@ -9,3 +10,5 @@ export * from './lib/order/order-item.dto';
 export * from './lib/order/payment-details.dto';
 export * from './lib/order/place-order.dto';
 export * from './lib/order/shipping-address.dto';
+export * from './lib/warehouse/check-items-availability-request.dto';
+export * from './lib/warehouse/check-items-availability-response.dto';

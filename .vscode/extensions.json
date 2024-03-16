@@ -2,6 +2,11 @@
   "recommendations": [
     "nrwl.angular-console",
     "esbenp.prettier-vscode",
-    "firsttris.vscode-jest-runner"
+    "firsttris.vscode-jest-runner",
+    "kuscamara.remove-unused-imports",
+    "mike-co.import-sorter",
+    "rangav.vscode-thunder-client",
+    "dbaeumer.vscode-eslint",
+    "dzhavat.bracket-pair-toggler"
   ]
 }

@@ -4,10 +4,11 @@ import { OrderController } from './controllers/order.controller';
 import { OrderService } from './services/order.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { LoyaltyClient } from '@nest-shared';
+import { LoyaltyClient, WarehouseClient } from '@nest-shared';
+import { MongooseModule } from '@nestjs/mongoose';
 
 const LOCAL_CONNECTION_STRING =
-  'mongodb://root:examplepassword@localhost:27017/';
+  'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin';
 export const DATABASE_CONFIGURATION = {
   mongoConnectionString: process.env.MONGO_CONNECTION_STRING_DOCKER
     ? process.env.MONGO_CONNECTION_STRING_DOCKER
@@ -16,6 +17,12 @@ export const DATABASE_CONFIGURATION = {
 
 @Module({
   imports: [
+    MongooseModule.forRoot(
+      DATABASE_CONFIGURATION.mongoConnectionString as string
+    ),
+    // MongooseModule.forFeature([
+    //   { name: CustomerLoyalty.name, schema: customerLoyaltySchema },
+    // ]),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
@@ -29,6 +36,6 @@ export const DATABASE_CONFIGURATION = {
     }),
   ],
   controllers: [OrderController],
-  providers: [OrderService, LoyaltyClient],
+  providers: [OrderService, LoyaltyClient, WarehouseClient],
 })
 export class AppModule {}

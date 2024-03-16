@@ -6,21 +6,23 @@ import {
   AssignLoyaltyPointsResponseDto,
   PlaceOrderDTO,
   LoyaltyClient,
+  WarehouseClient,
 } from '@nest-shared';
 
 @Controller('order')
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
-    private readonly loyaltyClient: LoyaltyClient
+    private readonly loyaltyClient: LoyaltyClient,
+    private readonly warehouseClient: WarehouseClient
   ) {}
 
   @Post('place-order')
   public async placeOrder(
     @Body() placeOrderDto: PlaceOrderDTO
   ): Promise<AssignLoyaltyPointsResponseDto> {
-    // // Check if items in stock
-    // this.warehouseClient.checkItemsAvailability(placeOrderDto.items);
+    // Check if items in stock
+    this.warehouseClient.checkItemsAvailability(placeOrderDto.items);
 
     // // Process payment
     // const paymentResult = await this.paymentClient.processPayment();

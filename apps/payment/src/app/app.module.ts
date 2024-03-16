@@ -4,9 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
+import { MongooseModule } from '@nestjs/mongoose';
 
 const LOCAL_CONNECTION_STRING =
-  'mongodb://root:examplepassword@localhost:27017/';
+  'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin';
 export const DATABASE_CONFIGURATION = {
   mongoConnectionString: process.env.MONGO_CONNECTION_STRING_DOCKER
     ? process.env.MONGO_CONNECTION_STRING_DOCKER
@@ -15,6 +16,9 @@ export const DATABASE_CONFIGURATION = {
 
 @Module({
   imports: [
+    MongooseModule.forRoot(
+      DATABASE_CONFIGURATION.mongoConnectionString as string
+    ),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({

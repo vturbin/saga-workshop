@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema({ collection: 'user' })
+@Schema({ collection: 'users' })
 export class CustomerLoyalty {
   @Prop({ required: true, unique: true })
   public userId: string;
