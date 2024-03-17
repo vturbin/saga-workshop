@@ -7,9 +7,10 @@ import { WarehouseController } from './controllers/warehouse.controller';
 import { WarehouseService } from './services/warehouse.service';
 import { StockSchema, stockSchema } from './models/stock.schema';
 import { StockRepository } from './repositories/stock.repository';
+import { MongooseSession, UnitOfWork } from '@nest-shared';
 
 const LOCAL_CONNECTION_STRING =
-  'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin';
+  'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
 export const DATABASE_CONFIGURATION = {
   mongoConnectionString: process.env.MONGO_CONNECTION_STRING_DOCKER
     ? process.env.MONGO_CONNECTION_STRING_DOCKER
@@ -37,6 +38,6 @@ export const DATABASE_CONFIGURATION = {
     }),
   ],
   controllers: [WarehouseController],
-  providers: [WarehouseService, StockRepository],
+  providers: [WarehouseService, StockRepository, UnitOfWork, MongooseSession],
 })
 export class AppModule {}

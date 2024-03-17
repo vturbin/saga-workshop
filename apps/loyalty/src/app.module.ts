@@ -12,7 +12,7 @@ import {
 } from './models/customer-loyalty.schema';
 
 const LOCAL_CONNECTION_STRING =
-  'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin';
+  'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
 export const DATABASE_CONFIGURATION = {
   mongoConnectionString: process.env.MONGO_CONNECTION_STRING_DOCKER
     ? process.env.MONGO_CONNECTION_STRING_DOCKER
