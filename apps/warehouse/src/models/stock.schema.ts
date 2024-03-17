@@ -7,6 +7,9 @@ export class StockSchema {
 
   @Prop({ required: true })
   public currentStock: number;
+
+  @Prop({ default: 0 })
+  public reservedAmount: number;
 }
 
 export const stockSchema = SchemaFactory.createForClass(StockSchema);

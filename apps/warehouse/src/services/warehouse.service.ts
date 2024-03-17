@@ -1,5 +1,5 @@
 import {
-  CheckItemsAvailabilityRequestDto,
+  ItemsRequestDto,
   CheckItemsAvailabilityResponseDto,
   ItemAvailabilityDto,
 } from '@nest-shared';
@@ -12,7 +12,7 @@ export class WarehouseService {
   public constructor(private stockRepository: StockRepository) {}
 
   public async checkItemsAvailability(
-    requestedItems: CheckItemsAvailabilityRequestDto[]
+    requestedItems: ItemsRequestDto[]
   ): Promise<CheckItemsAvailabilityResponseDto> {
     const itemIds = requestedItems.map((item) => item.itemId);
     const itemsInStock = await this.stockRepository.getItemsInStock(itemIds);
@@ -28,8 +28,22 @@ export class WarehouseService {
     return response;
   }
 
+  public async reserveItems(requestedItems: ItemsRequestDto[]): Promise<void> {
+    const itemsMap = new Map<string, number>();
+    requestedItems.map((item) => itemsMap.set(item.itemId, item.quantity));
+
+    return this.stockRepository.reserveItems(itemsMap);
+  }
+
+  public cancelItemsReservation(cancelItems: ItemsRequestDto[]): Promise<void> {
+    const itemsMap = new Map<string, number>();
+    cancelItems.map((item) => itemsMap.set(item.itemId, item.quantity));
+
+    return this.stockRepository.cancelItemsReservation(itemsMap);
+  }
+
   private getItemAvailabilityArray(
-    requestedItems: CheckItemsAvailabilityRequestDto[],
+    requestedItems: ItemsRequestDto[],
     itemsInStock: StockSchema[]
   ): ItemAvailabilityDto[] {
     const itemAvailabilityArrayDto: ItemAvailabilityDto[] = [];
@@ -45,7 +59,9 @@ export class WarehouseService {
           reason: 'Requested item does not exist',
         };
       } else {
-        const available = itemInStock.currentStock >= requestedItem.quantity;
+        const freeInStock =
+          itemInStock.currentStock - itemInStock.reservedAmount;
+        const available = freeInStock >= requestedItem.quantity;
         itemAvailabilityDto = {
           itemId: requestedItem.itemId,
           available,

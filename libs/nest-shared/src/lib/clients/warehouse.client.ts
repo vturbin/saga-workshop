@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import axios, { AxiosInstance } from 'axios';
-import { CheckItemsAvailabilityRequestDto } from '../warehouse/check-items-availability-request.dto';
+import { ItemsRequestDto } from '../warehouse/items-request.dto';
 import { CheckItemsAvailabilityResponseDto } from '../warehouse/check-items-availability-response.dto';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class WarehouseClient {
   }
 
   public async checkItemsAvailability(
-    items: CheckItemsAvailabilityRequestDto[]
+    items: ItemsRequestDto[]
   ): Promise<CheckItemsAvailabilityResponseDto> {
     const response =
       await this.httpClient.post<CheckItemsAvailabilityResponseDto>(
