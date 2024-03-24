@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { PaymentController } from './controllers/payment.controller';
+import { PaymentService } from './services/payment.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { MongooseModule } from '@nestjs/mongoose';
+import {
+  PaymentHistorySchema,
+  paymentHistorySchema,
+} from './models/payment-history.schema';
+import { PaymentHistoryRepository } from './repositories/payment-history.repository';
+import { MongooseSession, UnitOfWork } from '@nest-shared';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
@@ -19,6 +25,9 @@ export const DATABASE_CONFIGURATION = {
     MongooseModule.forRoot(
       DATABASE_CONFIGURATION.mongoConnectionString as string
     ),
+    MongooseModule.forFeature([
+      { name: PaymentHistorySchema.name, schema: paymentHistorySchema },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
@@ -31,7 +40,12 @@ export const DATABASE_CONFIGURATION = {
       }),
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [PaymentController],
+  providers: [
+    PaymentService,
+    PaymentHistoryRepository,
+    UnitOfWork,
+    MongooseSession,
+  ],
 })
 export class AppModule {}

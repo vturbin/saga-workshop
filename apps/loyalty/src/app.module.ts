@@ -10,6 +10,7 @@ import {
   CustomerLoyalty,
   customerLoyaltySchema,
 } from './models/customer-loyalty.schema';
+import { MongooseSession, UnitOfWork } from '@nest-shared';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
@@ -40,6 +41,11 @@ export const DATABASE_CONFIGURATION = {
     }),
   ],
   controllers: [PointsController],
-  providers: [PointsService, CustomerLoyaltyRepository],
+  providers: [
+    PointsService,
+    CustomerLoyaltyRepository,
+    UnitOfWork,
+    MongooseSession,
+  ],
 })
 export class AppModule {}

@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { MongoGenericRepository, UnitOfWork } from '@nest-shared';
 import { Model } from 'mongoose';
 import { StockSchema } from '../models/stock.schema';
@@ -33,9 +29,10 @@ export class StockRepository extends MongoGenericRepository<StockSchema> {
 
   public async reserveItems(
     requestedItems: Map<string, number>
-  ): Promise<void> {
-    this.unitOfWork.start();
+  ): Promise<number> {
+    await this.unitOfWork.start();
     try {
+      let total = 0;
       for (const [itemId, quantity] of requestedItems.entries()) {
         const itemSchema = await this.collection
           .findOne({ itemId })
@@ -47,6 +44,7 @@ export class StockRepository extends MongoGenericRepository<StockSchema> {
           if (availableForReservation >= quantity) {
             itemSchema.reservedAmount += quantity;
             itemSchema.save({ session: this.unitOfWork.session });
+            total = total + itemSchema.price * quantity;
           } else {
             throw new Error(`Insufficient stock for item ${itemId}`);
           }
@@ -54,7 +52,8 @@ export class StockRepository extends MongoGenericRepository<StockSchema> {
           throw new Error(`Item with id ${itemId} was not found`);
         }
       }
-      this.unitOfWork.commit();
+      await this.unitOfWork.commit();
+      return total;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to reserve items',
@@ -63,10 +62,37 @@ export class StockRepository extends MongoGenericRepository<StockSchema> {
     }
   }
 
+  public async updateItemsInStock(
+    requestedItems: Map<string, number>
+  ): Promise<void> {
+    await this.unitOfWork.start();
+    try {
+      for (const [itemId, quantity] of requestedItems.entries()) {
+        const itemSchema = await this.collection
+          .findOne({ itemId })
+          .session(this.unitOfWork.session)
+          .exec();
+        if (itemSchema) {
+          itemSchema.reservedAmount -= quantity;
+          itemSchema.currentStock -= quantity;
+          itemSchema.save({ session: this.unitOfWork.session });
+        } else {
+          throw new Error(`Item with id ${itemId} was not found`);
+        }
+      }
+      await this.unitOfWork.commit();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to update items',
+        error.message
+      );
+    }
+  }
+
   public async cancelItemsReservation(
     requestedItems: Map<string, number>
   ): Promise<void> {
-    this.unitOfWork.start();
+    await this.unitOfWork.start();
     try {
       for (const [itemId, quantity] of requestedItems.entries()) {
         const itemSchema = await this.collection
@@ -83,7 +109,7 @@ export class StockRepository extends MongoGenericRepository<StockSchema> {
           throw new Error(`Item with id ${itemId} was not found`);
         }
       }
-      this.unitOfWork.commit();
+      await this.unitOfWork.commit();
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to cancel items reservation',

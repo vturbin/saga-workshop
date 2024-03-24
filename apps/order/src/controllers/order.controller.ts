@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 
 import { OrderService } from '../services/order.service';
 import {
@@ -7,6 +7,9 @@ import {
   PlaceOrderDTO,
   LoyaltyClient,
   WarehouseClient,
+  PaymentClient,
+  ProcessPaymentDto,
+  PackageItemsRequestDto,
 } from '@nest-shared';
 
 @Controller('order')
@@ -14,7 +17,8 @@ export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     private readonly loyaltyClient: LoyaltyClient,
-    private readonly warehouseClient: WarehouseClient
+    private readonly warehouseClient: WarehouseClient,
+    private readonly paymentClient: PaymentClient
   ) {}
 
   @Post('place-order')
@@ -22,16 +26,35 @@ export class OrderController {
     @Body() placeOrderDto: PlaceOrderDTO
   ): Promise<AssignLoyaltyPointsResponseDto> {
     // Check if items in stock
-    this.warehouseClient.checkItemsAvailability(placeOrderDto.items);
+    const availability = await this.warehouseClient.checkItemsAvailability(
+      placeOrderDto.items
+    );
 
-    // // Process payment
-    // const paymentResult = await this.paymentClient.processPayment();
+    if (!availability.allItemsAvailable) {
+      throw new BadRequestException('Unfortunately some items are unavailable');
+    }
 
-    // // Package and send Order
-    // const orderPackaged = await this.warehouseClient.packageItems(
-    //   placeOrderDto.items,
-    //   placeOrderDto.shippingAddress
-    // );
+    // Reserve items
+    const totalAmount = await this.warehouseClient.reserveItems(
+      placeOrderDto.items
+    );
+
+    // Process payment
+    const paymentDetails: ProcessPaymentDto = {
+      ...placeOrderDto.paymentDetails,
+      amount: totalAmount,
+    };
+    const paymentResult = await this.paymentClient.processPayment(
+      paymentDetails
+    );
+
+    const packageItemsDto: PackageItemsRequestDto = {
+      items: placeOrderDto.items,
+      shippingAddress: placeOrderDto.shippingAddress,
+    };
+
+    // Package and send Order
+    await this.warehouseClient.packageItems(packageItemsDto);
 
     // award loyalty Points to customer
     const assignLoyaltyPoints: AssignLoyaltyPointsRequestDto = {

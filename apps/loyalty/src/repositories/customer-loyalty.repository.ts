@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { MongoGenericRepository } from '@nest-shared';
+import { MongoGenericRepository, UnitOfWork } from '@nest-shared';
 import { CustomerLoyalty } from '../models/customer-loyalty.schema';
 import { Model } from 'mongoose';
 
@@ -8,7 +8,8 @@ import { Model } from 'mongoose';
 export class CustomerLoyaltyRepository extends MongoGenericRepository<CustomerLoyalty> {
   public constructor(
     @InjectModel(CustomerLoyalty.name)
-    private collection: Model<CustomerLoyalty>
+    private collection: Model<CustomerLoyalty>,
+    private unitOfWork: UnitOfWork
   ) {
     super(collection);
   }
@@ -17,6 +18,7 @@ export class CustomerLoyaltyRepository extends MongoGenericRepository<CustomerLo
     userId: string,
     pointsToAdd: number
   ): Promise<CustomerLoyalty> {
+    await this.unitOfWork.start();
     const updatedDocument = await this.collection
       .findOneAndUpdate(
         { userId: userId },
@@ -24,9 +26,11 @@ export class CustomerLoyaltyRepository extends MongoGenericRepository<CustomerLo
         { new: true } // Return the updated document
       )
       .lean()
+      .session(this.unitOfWork.session)
       .exec();
     if (updatedDocument) {
       Logger.debug('Updated document:', updatedDocument);
+      await this.unitOfWork.commit();
       return updatedDocument;
     } else {
       Logger.debug('No document found with the specified userId');

@@ -4,7 +4,7 @@ import { OrderController } from './controllers/order.controller';
 import { OrderService } from './services/order.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { LoyaltyClient, WarehouseClient } from '@nest-shared';
+import { LoyaltyClient, PaymentClient, WarehouseClient } from '@nest-shared';
 import { MongooseModule } from '@nestjs/mongoose';
 
 const LOCAL_CONNECTION_STRING =
@@ -36,6 +36,6 @@ export const DATABASE_CONFIGURATION = {
     }),
   ],
   controllers: [OrderController],
-  providers: [OrderService, LoyaltyClient, WarehouseClient],
+  providers: [OrderService, LoyaltyClient, WarehouseClient, PaymentClient],
 })
 export class AppModule {}

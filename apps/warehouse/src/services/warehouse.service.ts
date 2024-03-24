@@ -2,6 +2,7 @@ import {
   ItemsRequestDto,
   CheckItemsAvailabilityResponseDto,
   ItemAvailabilityDto,
+  ShippingAddressDto,
 } from '@nest-shared';
 import { Injectable } from '@nestjs/common';
 import { StockRepository } from '../repositories/stock.repository';
@@ -28,7 +29,9 @@ export class WarehouseService {
     return response;
   }
 
-  public async reserveItems(requestedItems: ItemsRequestDto[]): Promise<void> {
+  public async reserveItems(
+    requestedItems: ItemsRequestDto[]
+  ): Promise<number> {
     const itemsMap = new Map<string, number>();
     requestedItems.map((item) => itemsMap.set(item.itemId, item.quantity));
 
@@ -40,6 +43,32 @@ export class WarehouseService {
     cancelItems.map((item) => itemsMap.set(item.itemId, item.quantity));
 
     return this.stockRepository.cancelItemsReservation(itemsMap);
+  }
+
+  public async packageItems(
+    itemsToPackage: ItemsRequestDto[],
+    shippingAddress: ShippingAddressDto
+  ): Promise<void> {
+    const itemsMap = new Map<string, number>();
+    itemsToPackage.map((item) => itemsMap.set(item.itemId, item.quantity));
+
+    await this.stockRepository.updateItemsInStock(itemsMap);
+    this.doSomeFancyPackagingOperations(itemsMap, shippingAddress);
+    return;
+  }
+
+  private doSomeFancyPackagingOperations(
+    itemsMap: Map<string, number>,
+    shippingAddress: ShippingAddressDto
+  ) {
+    console.log(
+      `following items are being packed: ${JSON.stringify(itemsMap)}`
+    );
+    console.log(
+      `Items are being shipped to this address: ${JSON.stringify(
+        shippingAddress
+      )}`
+    );
   }
 
   private getItemAvailabilityArray(

@@ -10,6 +10,9 @@ export class StockSchema {
 
   @Prop({ default: 0 })
   public reservedAmount: number;
+
+  @Prop()
+  public price: number;
 }
 
 export const stockSchema = SchemaFactory.createForClass(StockSchema);
