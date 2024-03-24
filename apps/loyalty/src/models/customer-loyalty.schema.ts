@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 
 @Schema({ collection: 'users' })
 export class CustomerLoyalty {
@@ -11,3 +12,8 @@ export class CustomerLoyalty {
 
 export const customerLoyaltySchema =
   SchemaFactory.createForClass(CustomerLoyalty);
+
+export const CustomerLoyaltyModel = mongoose.model(
+  'users',
+  customerLoyaltySchema
+);

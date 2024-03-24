@@ -52,7 +52,7 @@ export class PaymentHistoryRepository extends MongoGenericRepository<PaymentHist
     }
   }
 
-  public async updatePaymentStatus(paymentId: string): Promise<void> {
+  public async refundPayment(paymentId: string): Promise<void> {
     await this.unitOfWork.start();
     try {
       const payment = await this.collection.findOne({ paymentId }).exec();

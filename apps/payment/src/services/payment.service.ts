@@ -23,7 +23,7 @@ export class PaymentService {
 
   public async refundPayment(paymentId: string): Promise<void> {
     this.refundOperationWithPaymentGateway(paymentId);
-    await this.paymentHistoryRepository.updatePaymentStatus(paymentId);
+    await this.paymentHistoryRepository.refundPayment(paymentId);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

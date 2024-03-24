@@ -4,7 +4,7 @@ import {
   ItemAvailabilityDto,
   ShippingAddressDto,
 } from '@nest-shared';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { StockRepository } from '../repositories/stock.repository';
 import { StockSchema } from '../models/stock.schema';
 
@@ -52,8 +52,15 @@ export class WarehouseService {
     const itemsMap = new Map<string, number>();
     itemsToPackage.map((item) => itemsMap.set(item.itemId, item.quantity));
 
+    const failOrNotToFail = Math.random();
+
+    if (failOrNotToFail < 0.5) {
+      throw new BadRequestException('Could not package items');
+    }
+
     await this.stockRepository.updateItemsInStock(itemsMap);
     this.doSomeFancyPackagingOperations(itemsMap, shippingAddress);
+
     return;
   }
 
