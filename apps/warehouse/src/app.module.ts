@@ -8,6 +8,7 @@ import { WarehouseService } from './services/warehouse.service';
 import { StockSchema, stockSchema } from './models/stock.schema';
 import { StockRepository } from './repositories/stock.repository';
 import { MongooseSession, UnitOfWork } from '@nest-shared';
+import { SeedService } from './seed/seed';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
@@ -38,6 +39,12 @@ export const DATABASE_CONFIGURATION = {
     }),
   ],
   controllers: [WarehouseController],
-  providers: [WarehouseService, StockRepository, UnitOfWork, MongooseSession],
+  providers: [
+    WarehouseService,
+    StockRepository,
+    UnitOfWork,
+    MongooseSession,
+    SeedService,
+  ],
 })
 export class AppModule {}

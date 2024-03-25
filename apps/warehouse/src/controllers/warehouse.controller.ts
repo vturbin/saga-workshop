@@ -4,6 +4,7 @@ import {
   ItemsRequestDto,
   CheckItemsAvailabilityResponseDto,
   PackageItemsRequestDto,
+  ReserveItemsResponseDto,
 } from '@nest-shared';
 import { WarehouseService } from '../services/warehouse.service';
 
@@ -19,7 +20,9 @@ export class WarehouseController {
   }
 
   @Post('reserve-items')
-  public async reserveItems(@Body() items: ItemsRequestDto[]): Promise<number> {
+  public async reserveItems(
+    @Body() items: ItemsRequestDto[]
+  ): Promise<ReserveItemsResponseDto> {
     return this.warehouseService.reserveItems(items);
   }
 

@@ -3,6 +3,7 @@ import {
   CheckItemsAvailabilityResponseDto,
   ItemAvailabilityDto,
   ShippingAddressDto,
+  ReserveItemsResponseDto,
 } from '@nest-shared';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { StockRepository } from '../repositories/stock.repository';
@@ -31,11 +32,12 @@ export class WarehouseService {
 
   public async reserveItems(
     requestedItems: ItemsRequestDto[]
-  ): Promise<number> {
+  ): Promise<ReserveItemsResponseDto> {
     const itemsMap = new Map<string, number>();
     requestedItems.map((item) => itemsMap.set(item.itemId, item.quantity));
-
-    return this.stockRepository.reserveItems(itemsMap);
+    const totalAmount = await this.stockRepository.reserveItems(itemsMap);
+    const reserveItemsResponseDto: ReserveItemsResponseDto = { totalAmount };
+    return reserveItemsResponseDto;
   }
 
   public cancelItemsReservation(cancelItems: ItemsRequestDto[]): Promise<void> {
@@ -68,9 +70,10 @@ export class WarehouseService {
     itemsMap: Map<string, number>,
     shippingAddress: ShippingAddressDto
   ) {
-    console.log(
-      `following items are being packed: ${JSON.stringify(itemsMap)}`
-    );
+    const complexMapArray = Array.from(itemsMap.entries());
+    const complexJsonString = JSON.stringify(complexMapArray);
+    console.log(`following items are being packed: ${complexJsonString}`);
+
     console.log(
       `Items are being shipped to this address: ${JSON.stringify(
         shippingAddress

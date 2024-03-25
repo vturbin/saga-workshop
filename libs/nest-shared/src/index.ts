@@ -21,3 +21,4 @@ export * from './lib/order/shipping-address.dto';
 export * from './lib/warehouse/items-request.dto';
 export * from './lib/warehouse/check-items-availability-response.dto';
 export * from './lib/warehouse/package-items-request.dto';
+export * from './lib/warehouse/reserve-items-response.dto';

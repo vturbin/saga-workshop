@@ -3,8 +3,9 @@ import { Injectable } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { ItemsRequestDto } from '../warehouse/items-request.dto';
 import { CheckItemsAvailabilityResponseDto } from '../warehouse/check-items-availability-response.dto';
-import { ShippingAddressDto } from '../order/shipping-address.dto';
 import { PackageItemsRequestDto } from '../warehouse/package-items-request.dto';
+import { ReserveItemsResponseDto } from '../warehouse/reserve-items-response.dto';
+import { handleAxiosError } from '../utils/handle-http-error';
 
 @Injectable()
 export class WarehouseClient {
@@ -22,37 +23,55 @@ export class WarehouseClient {
   public async checkItemsAvailability(
     items: ItemsRequestDto[]
   ): Promise<CheckItemsAvailabilityResponseDto> {
-    const response =
-      await this.httpClient.post<CheckItemsAvailabilityResponseDto>(
-        '/check-items-availability',
-        items
-      );
-    return response.data;
+    try {
+      const response =
+        await this.httpClient.post<CheckItemsAvailabilityResponseDto>(
+          'warehouse/check-items-availability',
+          items
+        );
+      return response.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   }
 
-  public async reserveItems(items: ItemsRequestDto[]): Promise<number> {
-    const response = await this.httpClient.post<number>(
-      '/reserve-items',
-      items
-    );
-    return response.data;
+  public async reserveItems(
+    items: ItemsRequestDto[]
+  ): Promise<ReserveItemsResponseDto> {
+    try {
+      const response = await this.httpClient.post<ReserveItemsResponseDto>(
+        'warehouse/reserve-items',
+        items
+      );
+      return response.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   }
 
   public async packageItems(
     packageItemsDto: PackageItemsRequestDto
   ): Promise<void> {
-    const response = await this.httpClient.post<void>(
-      '/package-items',
-      packageItemsDto
-    );
-    return response.data;
+    try {
+      const response = await this.httpClient.post<void>(
+        'warehouse/package-items',
+        packageItemsDto
+      );
+      return response.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   }
 
   public async cancelItemsReservation(items: ItemsRequestDto[]): Promise<void> {
-    const response = await this.httpClient.post<void>(
-      '/cancel-items-reservation',
-      items
-    );
-    return response.data;
+    try {
+      const response = await this.httpClient.post<void>(
+        'warehouse/cancel-items-reservation',
+        items
+      );
+      return response.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   }
 }

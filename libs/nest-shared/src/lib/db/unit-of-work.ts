@@ -5,7 +5,7 @@ import { MongooseSession } from './mongoose-session';
 import { ClientSession } from 'mongoose';
 
 /**
- * Handles database transactions within a session-based scope.
+ * Handles database transactions.
  * It ensures consistency and rollback in case of errors during a transaction.
  * This class is injectable with a request scope.
  */

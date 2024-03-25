@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 
 @Injectable()
 export class MongooseSession {
+  public constructor(
+    @InjectConnection() private readonly connection: mongoose.Connection
+  ) {}
   public session: ClientSession;
 
   public async startSession(): Promise<ClientSession> {
-    this.session = await mongoose.startSession();
+    this.session = await this.connection.startSession();
     return this.session;
   }
 
@@ -23,6 +27,6 @@ export class MongooseSession {
   }
 
   public async endSession(): Promise<void> {
-    await this.session.endSession();
+    await this.session.endSession({ force: true, forceClear: true });
   }
 }

@@ -11,6 +11,7 @@ import {
   customerLoyaltySchema,
 } from './models/customer-loyalty.schema';
 import { MongooseSession, UnitOfWork } from '@nest-shared';
+import { SeedService } from './seed/seed';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
@@ -46,6 +47,7 @@ export const DATABASE_CONFIGURATION = {
     CustomerLoyaltyRepository,
     UnitOfWork,
     MongooseSession,
+    SeedService,
   ],
 })
 export class AppModule {}

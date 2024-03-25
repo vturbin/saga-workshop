@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
 
 @Schema({ collection: 'stock' })
 export class StockSchema {
@@ -17,5 +16,3 @@ export class StockSchema {
 }
 
 export const stockSchema = SchemaFactory.createForClass(StockSchema);
-
-export const StockModel = mongoose.model('stock', stockSchema);

@@ -25,45 +25,54 @@ export class PaymentHistoryRepository extends MongoGenericRepository<PaymentHist
   }
 
   public async createEntry(
-    item: ProcessPaymentDto
+    processPayment: ProcessPaymentDto
   ): Promise<PaymentHistorySchema> {
     await this.unitOfWork.start();
     const paymentHistorySchema: PaymentHistorySchema = {
-      paymentMethod: item.method,
+      paymentMethod: processPayment.method,
       paymentId: uuid(),
       paymentStatus: PaymentStatus.Completed,
-      amount: item.amount,
+      amount: processPayment.amount,
       date: new Date(),
     };
-    try {
-      const [paymentHistory] = await this.collection.create(
-        paymentHistorySchema,
-        {
-          session: this.unitOfWork.session,
-        }
-      );
-      await this.unitOfWork.commit();
-      return paymentHistory;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to create payment history entry',
-        error.message
-      );
-    }
+    const [paymentHistory] = await this.collection.create(
+      [paymentHistorySchema],
+      {
+        session: this.unitOfWork.session,
+      }
+    );
+    await this.unitOfWork.commit();
+    return paymentHistory;
   }
 
   public async refundPayment(paymentId: string): Promise<void> {
     await this.unitOfWork.start();
     try {
-      const payment = await this.collection.findOne({ paymentId }).exec();
-      if (!payment) {
+      const payments = await this.collection.find({ paymentId }).lean().exec();
+      if (!payments.length) {
         throw new BadRequestException(
-          `Payment with id ${paymentId} not found!`
+          `Payments with id ${paymentId} not found!`
         );
       }
-      payment.paymentStatus = PaymentStatus.Refunded;
-      payment.save({ session: this.unitOfWork.session });
-
+      const refundedPayment = payments.filter(
+        (payment) => payment.paymentStatus === PaymentStatus.Refunded
+      );
+      if (refundedPayment.length) {
+        throw new BadRequestException(
+          `Payment with id ${paymentId} has already been refunded`
+        );
+      }
+      const payment = payments[0];
+      const paymentHistorySchema: PaymentHistorySchema = {
+        paymentMethod: payment.paymentMethod,
+        paymentId: payment.paymentId,
+        paymentStatus: PaymentStatus.Refunded,
+        amount: payment.amount,
+        date: new Date(),
+      };
+      await this.collection.create([paymentHistorySchema], {
+        session: this.unitOfWork.session,
+      });
       await this.unitOfWork.commit();
     } catch (error) {
       throw new InternalServerErrorException(

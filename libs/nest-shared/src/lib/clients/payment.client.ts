@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 import { ProcessPaymentDto } from '../payment/process-payment.dto';
 import { PaymentIdDto } from '../payment/payment-id.dto';
 import { RefundPaymentDto } from '../payment/refund-payment.dto';
+import { handleAxiosError } from '../utils/handle-http-error';
 
 @Injectable()
 export class PaymentClient {
@@ -10,7 +11,7 @@ export class PaymentClient {
 
   constructor() {
     this.httpClient = axios.create({
-      baseURL: 'http://payment:3000/api/payment',
+      baseURL: 'http://payment:3000/api',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -20,20 +21,28 @@ export class PaymentClient {
   public async processPayment(
     paymentDetails: ProcessPaymentDto
   ): Promise<PaymentIdDto> {
-    const response = await this.httpClient.post<PaymentIdDto>(
-      '/process-payment',
-      paymentDetails
-    );
-    return response.data;
+    try {
+      const response = await this.httpClient.post<PaymentIdDto>(
+        'payment/process-payment',
+        paymentDetails
+      );
+      return response.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   }
 
   public async refundPayment(
     refundPaymentDto: RefundPaymentDto
   ): Promise<void> {
-    const response = await this.httpClient.post<void>(
-      '/process-payment',
-      refundPaymentDto
-    );
-    return response.data;
+    try {
+      const response = await this.httpClient.post<void>(
+        'payment/refund-payment',
+        refundPaymentDto
+      );
+      return response.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   }
 }

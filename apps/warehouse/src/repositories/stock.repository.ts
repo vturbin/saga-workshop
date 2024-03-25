@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { MongoGenericRepository, UnitOfWork } from '@nest-shared';
 import { Model } from 'mongoose';
 import { StockSchema } from '../models/stock.schema';
@@ -15,106 +19,84 @@ export class StockRepository extends MongoGenericRepository<StockSchema> {
   }
 
   public async getItemsInStock(itemIds: string[]): Promise<StockSchema[]> {
-    try {
-      return this.collection
-        .find({ itemId: { $in: itemIds } })
-        .lean()
-        .exec();
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve items from the database'
-      );
+    const items = await this.collection
+      .find({ itemId: { $in: itemIds } })
+      .lean()
+      .exec();
+    if (!items.length) {
+      throw new NotFoundException('Items with following ids not found');
     }
+    return items;
   }
 
   public async reserveItems(
     requestedItems: Map<string, number>
   ): Promise<number> {
     await this.unitOfWork.start();
-    try {
-      let total = 0;
-      for (const [itemId, quantity] of requestedItems.entries()) {
-        const itemSchema = await this.collection
-          .findOne({ itemId })
-          .session(this.unitOfWork.session)
-          .exec();
-        if (itemSchema) {
-          const availableForReservation =
-            itemSchema.currentStock - itemSchema.reservedAmount;
-          if (availableForReservation >= quantity) {
-            itemSchema.reservedAmount += quantity;
-            itemSchema.save({ session: this.unitOfWork.session });
-            total = total + itemSchema.price * quantity;
-          } else {
-            throw new Error(`Insufficient stock for item ${itemId}`);
-          }
+
+    let total = 0;
+    for (const [itemId, quantity] of requestedItems.entries()) {
+      const itemSchema = await this.collection.findOne({ itemId }).exec();
+      if (itemSchema) {
+        const availableForReservation =
+          itemSchema.currentStock - itemSchema.reservedAmount;
+        if (availableForReservation >= quantity) {
+          itemSchema.reservedAmount += quantity;
+          itemSchema.save({ session: this.unitOfWork.session });
+          total = total + itemSchema.price * quantity;
         } else {
-          throw new Error(`Item with id ${itemId} was not found`);
+          throw new BadRequestException(
+            `Insufficient stock for item ${itemId}`
+          );
         }
+      } else {
+        throw new NotFoundException(`Item with id ${itemId} was not found`);
       }
-      await this.unitOfWork.commit();
-      return total;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to reserve items',
-        error.message
-      );
     }
+    await this.unitOfWork.commit();
+    return total;
   }
 
   public async updateItemsInStock(
     requestedItems: Map<string, number>
   ): Promise<void> {
     await this.unitOfWork.start();
-    try {
-      for (const [itemId, quantity] of requestedItems.entries()) {
-        const itemSchema = await this.collection
-          .findOne({ itemId })
-          .session(this.unitOfWork.session)
-          .exec();
-        if (itemSchema) {
-          itemSchema.reservedAmount -= quantity;
-          itemSchema.currentStock -= quantity;
-          itemSchema.save({ session: this.unitOfWork.session });
-        } else {
-          throw new Error(`Item with id ${itemId} was not found`);
-        }
+
+    for (const [itemId, quantity] of requestedItems.entries()) {
+      const itemSchema = await this.collection
+        .findOne({ itemId })
+        .session(this.unitOfWork.session)
+        .exec();
+      if (itemSchema) {
+        itemSchema.reservedAmount -= quantity;
+        itemSchema.currentStock -= quantity;
+        await itemSchema.save({ session: this.unitOfWork.session });
+      } else {
+        throw new NotFoundException(`Item with id ${itemId} was not found`);
       }
-      await this.unitOfWork.commit();
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to update items',
-        error.message
-      );
     }
+    await this.unitOfWork.commit();
   }
 
   public async cancelItemsReservation(
     requestedItems: Map<string, number>
   ): Promise<void> {
     await this.unitOfWork.start();
-    try {
-      for (const [itemId, quantity] of requestedItems.entries()) {
-        const itemSchema = await this.collection
-          .findOne({ itemId })
-          .session(this.unitOfWork.session)
-          .exec();
-        if (itemSchema) {
-          itemSchema.reservedAmount =
-            itemSchema.reservedAmount <= quantity
-              ? 0
-              : itemSchema.reservedAmount - quantity;
-          itemSchema.save({ session: this.unitOfWork.session });
-        } else {
-          throw new Error(`Item with id ${itemId} was not found`);
-        }
+    for (const [itemId, quantity] of requestedItems.entries()) {
+      const itemSchema = await this.collection
+        .findOne({ itemId })
+        .session(this.unitOfWork.session)
+        .exec();
+      if (itemSchema) {
+        itemSchema.reservedAmount =
+          itemSchema.reservedAmount <= quantity
+            ? 0
+            : itemSchema.reservedAmount - quantity;
+        await itemSchema.save({ session: this.unitOfWork.session });
+      } else {
+        throw new NotFoundException(`Item with id ${itemId} was not found`);
       }
-      await this.unitOfWork.commit();
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to cancel items reservation',
-        error.message
-      );
     }
+    await this.unitOfWork.commit();
   }
 }

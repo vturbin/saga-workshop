@@ -4,8 +4,10 @@ import {
   LoyaltyClient,
   PackageItemsRequestDto,
   PaymentClient,
+  PaymentIdDto,
   PlaceOrderDTO,
   ProcessPaymentDto,
+  RefundPaymentDto,
   WarehouseClient,
 } from '@nest-shared';
 import { BadRequestException, Injectable } from '@nestjs/common';
@@ -31,35 +33,60 @@ export class OrderService {
     }
 
     // Reserve items
-    const totalAmount = await this.warehouseClient.reserveItems(
+    const reserveItemsResponse = await this.warehouseClient.reserveItems(
       placeOrderDto.items
     );
 
-    // Process payment
-    const paymentDetails: ProcessPaymentDto = {
-      ...placeOrderDto.paymentDetails,
-      amount: totalAmount,
-    };
-    const paymentResult = await this.paymentClient.processPayment(
-      paymentDetails
-    );
+    let paymentDetails: ProcessPaymentDto;
+    let processPaymentResult: PaymentIdDto;
 
-    const packageItemsDto: PackageItemsRequestDto = {
-      items: placeOrderDto.items,
-      shippingAddress: placeOrderDto.shippingAddress,
-    };
+    try {
+      // Process payment
+      paymentDetails = {
+        ...placeOrderDto.paymentDetails,
+        amount: reserveItemsResponse.totalAmount,
+      };
+      processPaymentResult = await this.paymentClient.processPayment(
+        paymentDetails
+      );
+    } catch (error) {
+      // Could not process payment. Should roll back now
+      await this.warehouseClient.cancelItemsReservation(placeOrderDto.items);
+      throw error;
+    }
 
-    // Package and send Order
-    await this.warehouseClient.packageItems(packageItemsDto);
+    try {
+      const packageItemsDto: PackageItemsRequestDto = {
+        items: placeOrderDto.items,
+        shippingAddress: placeOrderDto.shippingAddress,
+      };
 
-    // award loyalty Points to customer
-    const assignLoyaltyPoints: AssignLoyaltyPointsRequestDto = {
-      paidAmount: 1000,
-      userId: placeOrderDto.customerId,
-    };
-    const pointsAwarded = await this.loyaltyClient.awardPointsToCustomer(
-      assignLoyaltyPoints
-    );
-    return pointsAwarded;
+      // Package items
+      await this.warehouseClient.packageItems(packageItemsDto);
+    } catch (error) {
+      const refundPaymentDto: RefundPaymentDto = {
+        paymentId: processPaymentResult.paymentId,
+      };
+      await this.paymentClient.refundPayment(refundPaymentDto);
+      await this.warehouseClient.cancelItemsReservation(placeOrderDto.items);
+      throw error;
+    }
+
+    try {
+      // award loyalty Points to customer
+      const assignLoyaltyPoints: AssignLoyaltyPointsRequestDto = {
+        paidAmount: paymentDetails.amount,
+        userId: placeOrderDto.customerId,
+      };
+      const totalPoints = await this.loyaltyClient.awardPointsToCustomer(
+        assignLoyaltyPoints
+      );
+
+      return totalPoints;
+    } catch (error) {
+      // Do we actually need to revert the whole operation if points were not awarded to the customer?
+      console.log(error);
+      throw error;
+    }
   }
 }

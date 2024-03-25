@@ -5,6 +5,7 @@ import {
   AssignLoyaltyPointsRequestDto,
   AssignLoyaltyPointsResponseDto,
 } from '../loyalty/assign-loyalty-points.dto';
+import { handleAxiosError } from '../utils/handle-http-error';
 
 @Injectable()
 export class LoyaltyClient {
@@ -22,10 +23,15 @@ export class LoyaltyClient {
   public async awardPointsToCustomer(
     assignLoyaltyPointsDto: AssignLoyaltyPointsRequestDto
   ): Promise<AssignLoyaltyPointsResponseDto> {
-    const response = await this.httpClient.post<AssignLoyaltyPointsResponseDto>(
-      '/points',
-      assignLoyaltyPointsDto
-    );
-    return response.data;
+    try {
+      const response =
+        await this.httpClient.post<AssignLoyaltyPointsResponseDto>(
+          '/points',
+          assignLoyaltyPointsDto
+        );
+      return response.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   }
 }

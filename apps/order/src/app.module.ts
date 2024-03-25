@@ -20,9 +20,6 @@ export const DATABASE_CONFIGURATION = {
     MongooseModule.forRoot(
       DATABASE_CONFIGURATION.mongoConnectionString as string
     ),
-    // MongooseModule.forFeature([
-    //   { name: CustomerLoyalty.name, schema: customerLoyaltySchema },
-    // ]),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
