@@ -5,8 +5,8 @@
     "firsttris.vscode-jest-runner",
     "kuscamara.remove-unused-imports",
     "mike-co.import-sorter",
-    "rangav.vscode-thunder-client",
     "dbaeumer.vscode-eslint",
-    "dzhavat.bracket-pair-toggler"
+    "dzhavat.bracket-pair-toggler",
+    "postman.postman-for-vscode"
   ]
 }
