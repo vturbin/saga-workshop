@@ -3,15 +3,12 @@ import { PlaceOrderSagaState } from './place-order.state';
 import { Logger } from '@nestjs/common';
 
 export class AwardPointsToCustomerState extends PlaceOrderSagaState {
-  public constructor(private paidAmount: number) {
-    super();
-  }
   public async execute(): Promise<void> {
     try {
       Logger.debug(`Executing ${AwardPointsToCustomerState.name}`);
 
       const assignLoyaltyPoints: AssignLoyaltyPointsRequestDto = {
-        paidAmount: this.paidAmount,
+        paidAmount: this.saga.paidAmount,
         userId: this.saga.placeOrderDto.customerId,
       };
       await this.saga.loyaltyClient.awardPointsToCustomer(assignLoyaltyPoints);

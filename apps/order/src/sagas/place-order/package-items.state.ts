@@ -1,14 +1,8 @@
 import { PackageItemsRequestDto } from '@nest-shared';
 import { PlaceOrderSagaState } from './place-order.state';
-import { ProcessPaymentState } from './process-payment.state';
-import { AwardPointsToCustomerState } from './award-points-to-customer.state';
 import { Logger } from '@nestjs/common';
 
 export class PackageItemsState extends PlaceOrderSagaState {
-  constructor(private paymentId?: string, private paidAmount?: number) {
-    super();
-  }
-
   public async execute(): Promise<void> {
     Logger.debug(`Executing ${PackageItemsState.name}`);
 
@@ -18,15 +12,10 @@ export class PackageItemsState extends PlaceOrderSagaState {
     };
     try {
       await this.saga.warehouseClient.packageItems(packageItemsDto);
-      this.saga.setState(new AwardPointsToCustomerState(this.paidAmount));
     } catch (error) {
       Logger.debug(`${PackageItemsState.name} failed`);
-
-      this.saga.setState(new ProcessPaymentState(null, this.paymentId));
-      await this.saga.getState().compensate();
       throw error;
     }
-    await this.saga.getState().execute();
   }
   public compensate(): Promise<void> {
     Logger.debug(`No compensation action for ${PackageItemsState.name}`);
