@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 
 import { OrderService } from '../services/order.service';
-import { AssignLoyaltyPointsResponseDto, PlaceOrderDTO } from '@nest-shared';
+import { PlaceOrderDTO } from '@nest-shared';
 
 @Controller('order')
 export class OrderController {
@@ -10,7 +10,7 @@ export class OrderController {
   @Post('place-order')
   public async placeOrder(
     @Body() placeOrderDto: PlaceOrderDTO
-  ): Promise<AssignLoyaltyPointsResponseDto> {
+  ): Promise<{ message: string }> {
     return this.orderService.placeOrder(placeOrderDto);
   }
 }
