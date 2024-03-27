@@ -4,7 +4,7 @@ import { OrderController } from './controllers/order.controller';
 import { OrderService } from './services/order.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { LoyaltyClient, PaymentClient, WarehouseClient } from '@nest-shared';
+import { NestSharedModule } from '@nest-shared';
 import { MongooseModule } from '@nestjs/mongoose';
 
 const LOCAL_CONNECTION_STRING =
@@ -31,8 +31,9 @@ export const DATABASE_CONFIGURATION = {
         RABBITMQ_PORT: Joi.number().default(5672),
       }),
     }),
+    NestSharedModule,
   ],
   controllers: [OrderController],
-  providers: [OrderService, LoyaltyClient, WarehouseClient, PaymentClient],
+  providers: [OrderService],
 })
 export class AppModule {}

@@ -7,8 +7,9 @@ import { WarehouseController } from './controllers/warehouse.controller';
 import { WarehouseService } from './services/warehouse.service';
 import { StockSchema, stockSchema } from './models/stock.schema';
 import { StockRepository } from './repositories/stock.repository';
-import { MongooseSession, UnitOfWork } from '@nest-shared';
+import { MongooseSession, NestSharedModule, UnitOfWork } from '@nest-shared';
 import { SeedService } from './seed/seed';
+import { WarehouseRMQController } from './controllers/warehouse-rmq.controller';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
@@ -37,6 +38,7 @@ export const DATABASE_CONFIGURATION = {
         RABBITMQ_PORT: Joi.number().default(5672),
       }),
     }),
+    NestSharedModule,
   ],
   controllers: [WarehouseController],
   providers: [
@@ -45,6 +47,7 @@ export const DATABASE_CONFIGURATION = {
     UnitOfWork,
     MongooseSession,
     SeedService,
+    WarehouseRMQController,
   ],
 })
 export class AppModule {}

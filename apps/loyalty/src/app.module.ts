@@ -10,8 +10,9 @@ import {
   CustomerLoyalty,
   customerLoyaltySchema,
 } from './models/customer-loyalty.schema';
-import { MongooseSession, UnitOfWork } from '@nest-shared';
+import { MongooseSession, NestSharedModule, UnitOfWork } from '@nest-shared';
 import { SeedService } from './seed/seed';
+import { PointsRMQController } from './controllers/points-rmq.controller';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
@@ -40,6 +41,7 @@ export const DATABASE_CONFIGURATION = {
         RABBITMQ_PORT: Joi.number().default(5672),
       }),
     }),
+    NestSharedModule,
   ],
   controllers: [PointsController],
   providers: [
@@ -48,6 +50,7 @@ export const DATABASE_CONFIGURATION = {
     UnitOfWork,
     MongooseSession,
     SeedService,
+    PointsRMQController,
   ],
 })
 export class AppModule {}
