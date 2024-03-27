@@ -22,3 +22,11 @@ export * from './lib/warehouse/items-request.dto';
 export * from './lib/warehouse/check-items-availability-response.dto';
 export * from './lib/warehouse/package-items-request.dto';
 export * from './lib/warehouse/reserve-items-response.dto';
+
+export * from './lib/constants/rmq.constants';
+
+export * from './lib/utils/handle-rpc-error';
+export * from './lib/utils/handle-rpc-service-call';
+export * from './lib/utils/handle-rpc-response';
+
+export * from './lib/interfaces/rpc-response.interface';
