@@ -1,5 +1,5 @@
 import {
-  ItemsRequestDto,
+  ItemRequestDto,
   CheckItemsAvailabilityResponseDto,
   ItemAvailabilityDto,
   ShippingAddressDto,
@@ -14,7 +14,7 @@ export class WarehouseService {
   public constructor(private stockRepository: StockRepository) {}
 
   public async checkItemsAvailability(
-    requestedItems: ItemsRequestDto[]
+    requestedItems: ItemRequestDto[]
   ): Promise<CheckItemsAvailabilityResponseDto> {
     const itemIds = requestedItems.map((item) => item.itemId);
     const itemsInStock = await this.stockRepository.getItemsInStock(itemIds);
@@ -31,7 +31,7 @@ export class WarehouseService {
   }
 
   public async reserveItems(
-    requestedItems: ItemsRequestDto[]
+    requestedItems: ItemRequestDto[]
   ): Promise<ReserveItemsResponseDto> {
     const itemsMap = new Map<string, number>();
     requestedItems.map((item) => itemsMap.set(item.itemId, item.quantity));
@@ -40,7 +40,7 @@ export class WarehouseService {
     return reserveItemsResponseDto;
   }
 
-  public cancelItemsReservation(cancelItems: ItemsRequestDto[]): Promise<void> {
+  public cancelItemsReservation(cancelItems: ItemRequestDto[]): Promise<void> {
     const itemsMap = new Map<string, number>();
     cancelItems.map((item) => itemsMap.set(item.itemId, item.quantity));
 
@@ -48,7 +48,7 @@ export class WarehouseService {
   }
 
   public async packageItems(
-    itemsToPackage: ItemsRequestDto[],
+    itemsToPackage: ItemRequestDto[],
     shippingAddress: ShippingAddressDto
   ): Promise<void> {
     const itemsMap = new Map<string, number>();
@@ -82,7 +82,7 @@ export class WarehouseService {
   }
 
   private getItemAvailabilityArray(
-    requestedItems: ItemsRequestDto[],
+    requestedItems: ItemRequestDto[],
     itemsInStock: StockSchema[]
   ): ItemAvailabilityDto[] {
     const itemAvailabilityArrayDto: ItemAvailabilityDto[] = [];

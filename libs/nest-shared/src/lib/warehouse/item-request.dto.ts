@@ -1,6 +1,6 @@
 import { IsString, Min } from 'class-validator';
 
-export class ItemsRequestDto {
+export class ItemRequestDto {
   @IsString()
   itemId: string; // Unique identifier for the item
 

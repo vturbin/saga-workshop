@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import axios, { AxiosInstance } from 'axios';
-import { ItemsRequestDto } from '../warehouse/items-request.dto';
+import { ItemRequestDto } from '../warehouse/item-request.dto';
 import { CheckItemsAvailabilityResponseDto } from '../warehouse/check-items-availability-response.dto';
 import { PackageItemsRequestDto } from '../warehouse/package-items-request.dto';
 import { ReserveItemsResponseDto } from '../warehouse/reserve-items-response.dto';
@@ -21,7 +21,7 @@ export class WarehouseClient {
   }
 
   public async checkItemsAvailability(
-    items: ItemsRequestDto[]
+    items: ItemRequestDto[]
   ): Promise<CheckItemsAvailabilityResponseDto> {
     try {
       const response =
@@ -36,7 +36,7 @@ export class WarehouseClient {
   }
 
   public async reserveItems(
-    items: ItemsRequestDto[]
+    items: ItemRequestDto[]
   ): Promise<ReserveItemsResponseDto> {
     try {
       const response = await this.httpClient.post<ReserveItemsResponseDto>(
@@ -63,7 +63,7 @@ export class WarehouseClient {
     }
   }
 
-  public async cancelItemsReservation(items: ItemsRequestDto[]): Promise<void> {
+  public async cancelItemsReservation(items: ItemRequestDto[]): Promise<void> {
     try {
       const response = await this.httpClient.post<void>(
         'warehouse/cancel-items-reservation',

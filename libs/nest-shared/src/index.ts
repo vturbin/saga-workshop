@@ -15,13 +15,21 @@ export * from './lib/order/order-item.dto';
 export * from './lib/order/payment-details.dto';
 export * from './lib/payment/payment-id.dto';
 export * from './lib/payment/process-payment.dto';
+export * from './lib/payment/process-payment-response.dto';
 export * from './lib/payment/refund-payment.dto';
+
 export * from './lib/order/place-order.dto';
+export * from './lib/order/order.dto';
+export * from './lib/order/order-id.dto';
+
 export * from './lib/order/shipping-address.dto';
-export * from './lib/warehouse/items-request.dto';
+export * from './lib/warehouse/item-request.dto';
+export * from './lib/warehouse/order-items-request.dto';
+
 export * from './lib/warehouse/check-items-availability-response.dto';
 export * from './lib/warehouse/package-items-request.dto';
 export * from './lib/warehouse/reserve-items-response.dto';
+export * from './lib/warehouse/reserve-items-for-order-response.dto';
 
 export * from './lib/constants/rmq.constants';
 

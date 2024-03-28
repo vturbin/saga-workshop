@@ -8,7 +8,7 @@ import { orderExchange } from './constants/rmq.constants';
   controllers: [],
   imports: [
     SharedRabbitMQModule.forRoot(SharedRabbitMQModule, {
-      exchanges: [{ name: orderExchange, type: 'direct' }],
+      exchanges: [{ name: orderExchange, type: 'topic' }],
       uri: `amqp://${process.env['RABBITMQ_USER']}:${process.env['RABBITMQ_PASSWORD']}@rabbitmq:${process.env['RABBITMQ_PORT']}`,
       prefetchCount: 1,
     }),

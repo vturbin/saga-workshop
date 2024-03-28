@@ -6,6 +6,9 @@ export class AssignLoyaltyPointsRequestDto {
 
   @IsString()
   userId: string;
+
+  @IsString()
+  orderId?: string;
 }
 
 export class AssignLoyaltyPointsResponseDto {
@@ -14,4 +17,7 @@ export class AssignLoyaltyPointsResponseDto {
 
   @IsString()
   userId: string;
+
+  @IsString()
+  orderId?: string;
 }

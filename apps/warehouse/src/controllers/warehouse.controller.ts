@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 
 import {
-  ItemsRequestDto,
+  ItemRequestDto,
   CheckItemsAvailabilityResponseDto,
   PackageItemsRequestDto,
   ReserveItemsResponseDto,
@@ -14,21 +14,21 @@ export class WarehouseController {
 
   @Post('check-items-availability')
   public async checkItemsAvailability(
-    @Body() items: ItemsRequestDto[]
+    @Body() items: ItemRequestDto[]
   ): Promise<CheckItemsAvailabilityResponseDto> {
     return this.warehouseService.checkItemsAvailability(items);
   }
 
   @Post('reserve-items')
   public async reserveItems(
-    @Body() items: ItemsRequestDto[]
+    @Body() items: ItemRequestDto[]
   ): Promise<ReserveItemsResponseDto> {
     return this.warehouseService.reserveItems(items);
   }
 
   @Post('cancel-items-reservation')
   public async cancelItemsReservation(
-    @Body() items: ItemsRequestDto[]
+    @Body() items: ItemRequestDto[]
   ): Promise<void> {
     return this.warehouseService.cancelItemsReservation(items);
   }

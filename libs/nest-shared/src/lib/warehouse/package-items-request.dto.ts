@@ -1,12 +1,15 @@
 import { Type } from 'class-transformer';
 import { ShippingAddressDto } from '../order/shipping-address.dto';
-import { ItemsRequestDto } from './items-request.dto';
-import { ValidateNested } from 'class-validator';
+import { ItemRequestDto } from './item-request.dto';
+import { IsString, ValidateNested } from 'class-validator';
 
 export class PackageItemsRequestDto {
-  @Type(() => ItemsRequestDto)
+  @IsString()
+  orderId?: string;
+
+  @Type(() => ItemRequestDto)
   @ValidateNested()
-  items: ItemsRequestDto[];
+  items: ItemRequestDto[];
 
   @Type(() => ShippingAddressDto)
   @ValidateNested()

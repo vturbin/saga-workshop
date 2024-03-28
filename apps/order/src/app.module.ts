@@ -6,6 +6,12 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { NestSharedModule } from '@nest-shared';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PlaceOrderSaga } from './sagas/place-order/place-order.saga';
+import { CheckItemsAvailabilityState } from './sagas/place-order/check-items-availability.state';
+import { ReserveItemsState } from './sagas/place-order/reserve-items.state';
+import { ProcessPaymentState } from './sagas/place-order/process-payment.state';
+import { AwardPointsToCustomerState } from './sagas/place-order/award-points-to-customer.state';
+import { PackageItemsState } from './sagas/place-order/package-items.state';
 
 const LOCAL_CONNECTION_STRING =
   'mongodb://root:examplepassword@localhost:27017/workshop?authSource=admin?replicaSet=rs0';
@@ -34,6 +40,15 @@ export const DATABASE_CONFIGURATION = {
     NestSharedModule,
   ],
   controllers: [OrderController],
-  providers: [OrderService],
+  providers: [
+    OrderService,
+    PlaceOrderSaga,
+    CheckItemsAvailabilityState,
+    ReserveItemsState,
+    ProcessPaymentState,
+    ReserveItemsState,
+    AwardPointsToCustomerState,
+    PackageItemsState,
+  ],
 })
 export class AppModule {}

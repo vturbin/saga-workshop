@@ -5,29 +5,42 @@ import {
   AssignLoyaltyPointsResponseDto,
   OrderRoutingKey,
   RpcResponse,
+  awardPointsQueue,
   handleRPCServiceCall,
   orderExchange,
-  orderQueue,
 } from '@nest-shared';
-import { RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class PointsRMQController {
-  constructor(private readonly pointsService: PointsService) {}
+  constructor(
+    private readonly pointsService: PointsService,
+    private amqpConnection: AmqpConnection
+  ) {}
 
-  @RabbitRPC({
+  @RabbitSubscribe({
     exchange: orderExchange,
     routingKey: OrderRoutingKey.AwardPoints,
-    queue: orderQueue,
+    queue: awardPointsQueue,
   })
   public async awardPointsToCustomer(
     assignLoyaltyPointsDto: AssignLoyaltyPointsRequestDto
-  ): Promise<RpcResponse<AssignLoyaltyPointsResponseDto>> {
-    return handleRPCServiceCall(
+  ): Promise<void> {
+    const response = await handleRPCServiceCall(
       this.pointsService.awardPointsToCustomer(
         assignLoyaltyPointsDto.userId,
         assignLoyaltyPointsDto.paidAmount
       )
+    );
+
+    const rpcResponse: RpcResponse<AssignLoyaltyPointsResponseDto> = {
+      ...response,
+      data: { ...response.data, orderId: assignLoyaltyPointsDto.orderId },
+    };
+    this.amqpConnection.publish<RpcResponse<AssignLoyaltyPointsResponseDto>>(
+      orderExchange,
+      OrderRoutingKey.AwardPointsResponse,
+      rpcResponse
     );
   }
 }

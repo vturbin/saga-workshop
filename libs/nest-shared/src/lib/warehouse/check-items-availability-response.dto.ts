@@ -2,6 +2,8 @@ export class CheckItemsAvailabilityResponseDto {
   availability: ItemAvailabilityDto[];
 
   allItemsAvailable: boolean;
+
+  orderId?: string;
 }
 
 export class ItemAvailabilityDto {

@@ -1,72 +1,120 @@
 import { Injectable } from '@nestjs/common';
-import { RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import {
   CheckItemsAvailabilityResponseDto,
-  ItemsRequestDto,
+  OrderIdDto,
+  OrderItemsRequestDto,
   OrderRoutingKey,
   PackageItemsRequestDto,
-  ReserveItemsResponseDto,
+  ReserveItemsForOrderResponseDto,
   RpcResponse,
+  cancelItemsReservationQueue,
+  checkItemsQueue,
   handleRPCServiceCall,
   orderExchange,
-  orderQueue,
+  packageItemsQueue,
+  reserveItemsQueue,
 } from '@nest-shared';
 import { WarehouseService } from '../services/warehouse.service';
 
 @Injectable()
 export class WarehouseRMQController {
-  constructor(private warehouseService: WarehouseService) {}
+  constructor(
+    private warehouseService: WarehouseService,
+    private amqpConnection: AmqpConnection
+  ) {}
 
-  @RabbitRPC({
+  @RabbitSubscribe({
     exchange: orderExchange,
     routingKey: OrderRoutingKey.CheckItemsAvailability,
-    queue: orderQueue,
+    queue: checkItemsQueue,
   })
   public async checkItemsAvailability(
-    items: ItemsRequestDto[]
-  ): Promise<RpcResponse<CheckItemsAvailabilityResponseDto>> {
-    return handleRPCServiceCall(
-      this.warehouseService.checkItemsAvailability(items)
+    orderItemsRequest: OrderItemsRequestDto
+  ): Promise<void> {
+    const response = await handleRPCServiceCall(
+      this.warehouseService.checkItemsAvailability(orderItemsRequest.items)
+    );
+    if (!response.error) {
+      response.data.orderId = orderItemsRequest.orderId;
+    }
+
+    this.amqpConnection.publish<RpcResponse<CheckItemsAvailabilityResponseDto>>(
+      orderExchange,
+      OrderRoutingKey.CheckItemsAvailabilityResponse,
+      response
     );
   }
 
-  @RabbitRPC({
+  @RabbitSubscribe({
     exchange: orderExchange,
     routingKey: OrderRoutingKey.ReserveItems,
-    queue: orderQueue,
+    queue: reserveItemsQueue,
   })
   public async reserveItems(
-    items: ItemsRequestDto[]
-  ): Promise<RpcResponse<ReserveItemsResponseDto>> {
-    return handleRPCServiceCall(this.warehouseService.reserveItems(items));
-  }
+    orderItemsRequest: OrderItemsRequestDto
+  ): Promise<void> {
+    const response = await handleRPCServiceCall(
+      this.warehouseService.reserveItems(orderItemsRequest.items)
+    );
 
-  @RabbitRPC({
-    exchange: orderExchange,
-    routingKey: OrderRoutingKey.CancelItemsReservation,
-    queue: orderQueue,
-  })
-  public async cancelItemsReservation(
-    items: ItemsRequestDto[]
-  ): Promise<RpcResponse<void>> {
-    return handleRPCServiceCall(
-      this.warehouseService.cancelItemsReservation(items)
+    const rpcResponse = {
+      ...response,
+      data: { ...response.data, orderId: orderItemsRequest.orderId },
+    } satisfies RpcResponse<ReserveItemsForOrderResponseDto>;
+
+    this.amqpConnection.publish<RpcResponse<ReserveItemsForOrderResponseDto>>(
+      orderExchange,
+      OrderRoutingKey.ReserveItemsResponse,
+      rpcResponse
     );
   }
 
-  @RabbitRPC({
+  @RabbitSubscribe({
+    exchange: orderExchange,
+    routingKey: OrderRoutingKey.CancelItemsReservation,
+    queue: cancelItemsReservationQueue,
+  })
+  public async cancelItemsReservation(
+    orderItemsRequest: OrderItemsRequestDto
+  ): Promise<void> {
+    const response = await handleRPCServiceCall(
+      this.warehouseService.cancelItemsReservation(orderItemsRequest.items)
+    );
+    const rpcResponse: RpcResponse<OrderIdDto> = {
+      ...response,
+      data: { orderId: orderItemsRequest.orderId },
+    };
+    this.amqpConnection.publish<RpcResponse<OrderIdDto>>(
+      orderExchange,
+      OrderRoutingKey.CancelItemsReservationResponse,
+      rpcResponse
+    );
+  }
+
+  @RabbitSubscribe({
     exchange: orderExchange,
     routingKey: OrderRoutingKey.PackageItems,
-    queue: orderQueue,
+    queue: packageItemsQueue,
   })
   public async packageItems(
     packageItemsDto: PackageItemsRequestDto
-  ): Promise<RpcResponse<void>> {
-    return handleRPCServiceCall(
+  ): Promise<void> {
+    const response = await handleRPCServiceCall(
       this.warehouseService.packageItems(
         packageItemsDto.items,
         packageItemsDto.shippingAddress
       )
+    );
+
+    const rpcResponse: RpcResponse<OrderIdDto> = {
+      ...response,
+      data: { orderId: packageItemsDto.orderId },
+    };
+    this.amqpConnection.publish<RpcResponse<OrderIdDto>>(
+      orderExchange,
+      OrderRoutingKey.PackageItemsResponse,
+      rpcResponse
     );
   }
 }
