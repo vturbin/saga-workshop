@@ -3,27 +3,9 @@ version: '3.8'
 services:
   mongo:
     image: mongo:7.0.2
-    command:
-      [
-        '--replSet',
-        'rs0',
-        '--bind_ip_all',
-        '--port',
-        '27017',
-        '--keyFile',
-        '/etc/mongodb/pki/keyfile',
-      ]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017", "--keyFile", "/etc/mongodb/pki/keyfile"]
     ports:
       - '27017:27017'
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    healthcheck:
-      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh -u ${MONGO_USERNAME} -p ${MONGO_PASSWORD} --port 27017 --quiet
-      interval: 5s
-      timeout: 30s
-      start_period: 0s
-      start_interval: 1s
-      retries: 30
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
@@ -31,8 +13,20 @@ services:
     volumes:
       - mongodb-data:/data/db
       - mongo1_config:/data/configdb
-      - ${PWD}/rs_keyfile:/etc/mongodb/pki/keyfile
+      - ${WORKSPACE_ROOT}/apps/db/rs_keyfile:/etc/mongodb/pki/keyfile
     restart: always
+  mongo-init:
+    restart: on-failure
+    # this container will exit after executing the command
+    build:
+      context: ${WORKSPACE_ROOT}/apps/db/db-init
+      dockerfile: Dockerfile
+    container_name: mongo-init
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    depends_on:
+        - mongo
   rabbitmq:
     image: 'rabbitmq:management'
     ports:
